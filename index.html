@@ -1,10 +1,16 @@
-<!-- index.html --><!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Abelion Music Player</title>
   <link rel="icon" href="Icon.jpg" type="image/jpg">
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Abelion Music Player">
+  <link rel="apple-touch-icon" href="Icon.jpg">
   <style>
     body {
       margin: 0;
@@ -45,6 +51,10 @@
       border-radius: 15px;
       text-align: center;
       cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .song-card:hover {
+      transform: scale(1.05);
     }
     .song-card img {
       width: 100%;
@@ -61,10 +71,55 @@
       border: none;
       color: white;
       font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .offline-indicator {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #ff4444;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      display: none;
+      z-index: 1000;
+    }
+    .offline-indicator.show {
+      display: block;
+    }
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1db954;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 25px;
+      cursor: pointer;
+      display: none;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+    }
+    .install-prompt.show {
+      display: block;
+    }
+    @keyframes slideUp {
+      from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
     }
   </style>
 </head>
 <body>
+  <div class="offline-indicator" id="offlineIndicator">
+    📱 Offline Mode
+  </div>
+  
+  <div class="install-prompt" id="installPrompt">
+    📱 Install App for Better Experience
+  </div>
+  
   <header>
     <h2>Abelion Music Player</h2>
   </header>
@@ -77,6 +132,7 @@
     <button>➕</button>
     <button>👤</button>
   </nav>
+  
   <script>
     const songs = [
       { title: "Unconditionally", artist: "Katy Perry", file: "music/lagu1.mp3" },
@@ -84,41 +140,115 @@
       { title: "Yad", artist: "Ariana Grande", file: "music/lagu3.mp3" },
       { title: "I'll Do It", artist: "Heidi Montag", file: "music/lagu4.mp3" },
       { title: "On The Floor", artist: "JLo ft Pitbull", file: "music/lagu5.mp3" },
-      {
-        title: "Stereo Love",
-        artist: "unknown",
-        file: "music/lagu6.mp3",
-      }
+      { title: "Stereo Love", artist: "unknown", file: "music/lagu6.mp3" }
     ];
+    
     const songList = document.getElementById("songList");
     const searchInput = document.getElementById("searchInput");
-
-function renderSongs(filter = "") {
-  songList.innerHTML = "";
-  songs.filter(s => s.title.toLowerCase().includes(filter.toLowerCase())).forEach((song, i) => {
-    const card = document.createElement("div");
-    card.className = "song-card";
-    card.innerHTML = `
-      <img src="image/doit.jpeg" alt="cover" />
-      <p>${song.title}</p>
-      <small>${song.artist}</small>
-    `;
-    card.onclick = () => {
-      localStorage.setItem("selectedIndex", i);
-      location.href = "detail-lagu.html";
-    };
-    songList.appendChild(card);
-  });
-}
-
-searchInput.addEventListener("input", () => renderSongs(searchInput.value));
-renderSongs();
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('✅ Service Worker registered'))
-      .catch(err => console.error('❌ SW failed', err));
-  }
+    const offlineIndicator = document.getElementById("offlineIndicator");
+    const installPrompt = document.getElementById("installPrompt");
+    
+    let deferredPrompt;
+    
+    function renderSongs(filter = "") {
+      songList.innerHTML = "";
+      songs.filter(s => s.title.toLowerCase().includes(filter.toLowerCase())).forEach((song, i) => {
+        const card = document.createElement("div");
+        card.className = "song-card";
+        card.innerHTML = `
+          <img src="image/doit.jpeg" alt="cover" />
+          <p>${song.title}</p>
+          <small>${song.artist}</small>
+        `;
+        card.onclick = () => {
+          localStorage.setItem("selectedIndex", i);
+          location.href = "detail-lagu.html";
+        };
+        songList.appendChild(card);
+      });
+    }
+    
+    searchInput.addEventListener("input", () => renderSongs(searchInput.value));
+    renderSongs();
+    
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => {
+          console.log('✅ Service Worker registered successfully:', registration);
+          
+          // Check for updates
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('🔄 New content available, please refresh');
+                // You can show a notification here
+              }
+            });
+          });
+        })
+        .catch(error => {
+          console.error('❌ Service Worker registration failed:', error);
+        });
+    }
+    
+    // Network status detection
+    function updateOnlineStatus() {
+      if (navigator.onLine) {
+        offlineIndicator.classList.remove('show');
+        console.log('🌐 Back online');
+      } else {
+        offlineIndicator.classList.add('show');
+        console.log('📱 Offline mode');
+      }
+    }
+    
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+    
+    // PWA Install Prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installPrompt.classList.add('show');
+    });
+    
+    installPrompt.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to install prompt: ${outcome}`);
+        deferredPrompt = null;
+        installPrompt.classList.remove('show');
+      }
+    });
+    
+    // Hide install prompt after app is installed
+    window.addEventListener('appinstalled', () => {
+      console.log('🎉 PWA was installed');
+      installPrompt.classList.remove('show');
+    });
+    
+    // Preload critical resources
+    function preloadResources() {
+      const criticalResources = [
+        'image/doit.jpeg',
+        'music/lagu1.mp3',
+        'music/lagu2.mp3'
+      ];
+      
+      criticalResources.forEach(resource => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = resource;
+        document.head.appendChild(link);
+      });
+    }
+    
+    // Preload resources after page load
+    window.addEventListener('load', preloadResources);
   </script>
 </body>
 </html>
