@@ -1,0 +1,118 @@
+<!-- index.html --><!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abelion Music Player</title>
+  <link rel="icon" href="Icon.jpg" type="image/jpg">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header, footer {
+      padding: 1rem;
+      text-align: center;
+    }
+    .search-box {
+      padding: 0.7rem 1rem;
+      border-radius: 20px;
+    }
+    .search-box input {
+      width: 83vw;
+      padding: 0.7rem;
+      border-radius: 20px;
+      border: 1px solid #333;
+      background: #111;
+      color: white;
+    }
+    .song-list {
+      flex: 1;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .song-card {
+      background: #111;
+      padding: 0.5rem;
+      border-radius: 15px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .song-card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background: #111;
+      padding: 0.5rem;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Abelion Music Player</h2>
+  </header>
+  <div class="search-box">
+    <input type="text" placeholder="Search..." id="searchInput" />
+  </div>
+  <div class="song-list" id="songList"></div>
+  <nav>
+    <button>🏠</button>
+    <button>➕</button>
+    <button>👤</button>
+  </nav>
+  <script>
+    const songs = [
+      { title: "Unconditionally", artist: "Katy Perry", file: "lagu1.mp3" },
+      { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "lagu2.mp3" },
+      { title: "Yad", artist: "Ariana Grande", file: "lagu3.mp3" },
+      { title: "I'll Do It", artist: "Heidi Montag", file: "lagu4.mp3" },
+      { title: "On The Floor", artist: "JLo ft Pitbull", file: "lagu5.mp3" },
+      {
+        title: "Stereo Love",
+        artist: "unknown",
+        file: "lagu6.mp3",
+      }
+    ];
+    const songList = document.getElementById("songList");
+    const searchInput = document.getElementById("searchInput");
+
+function renderSongs(filter = "") {
+  songList.innerHTML = "";
+  songs.filter(s => s.title.toLowerCase().includes(filter.toLowerCase())).forEach((song, i) => {
+    const card = document.createElement("div");
+    card.className = "song-card";
+    card.innerHTML = `
+      <img src="doit.jpeg" alt="cover" />
+      <p>${song.title}</p>
+      <small>${song.artist}</small>
+    `;
+    card.onclick = () => {
+      localStorage.setItem("selectedIndex", i);
+      location.href = "detail-lagu.html";
+    };
+    songList.appendChild(card);
+  });
+}
+
+searchInput.addEventListener("input", () => renderSongs(searchInput.value));
+renderSongs();
+
+  </script>
+</body>
+</html>

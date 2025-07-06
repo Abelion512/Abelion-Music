@@ -1,0 +1,420 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detail Lagu - Abelion Music Player</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" href="Icon.jpg" type="image/jpg">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .bg-blur, .bg-video {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      transition: opacity 0.6s ease;
+    }
+    .bg-video.hidden, .bg-blur.hidden, .album-art.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+      transition: all 0.5s ease;
+    }
+    .back-button {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      padding: 0.5rem 1rem;
+      color: white;
+      border-radius: 6px;
+      background-color: #222;
+      cursor: pointer;
+    }
+    .menu-button {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: white;
+      cursor: pointer;
+    }
+    .popup-menu {
+      position: absolute;
+      top: 3rem;
+      right: 1rem;
+      background-color: #222;
+      border-radius: 10px;
+      padding: 0.5rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 100;
+    }
+    .popup-menu button {
+      background: none;
+      border: none;
+      color: white;
+      text-align: left;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+    }
+    .album-art {
+      width: 80%;
+      max-width: 300px;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      transition: opacity 0.5s ease;
+    }
+    .song-info {
+      text-align: center;
+      margin: 1rem 0;
+    }
+    .progress-container {
+      width: 90%;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .progress-container input { width: 100%; }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.2rem;
+      margin: 1rem 0;
+    }
+    .controls button {
+      background-color: #222;
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .controls .main {
+      width: 65px;
+      height: 65px;
+      font-size: 1.5rem;
+    }
+    .controls .active {
+      background-color: #1db954;
+    }
+    .lyric-toggle {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 1rem;
+      color: #aaa;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.3s;
+    }
+    .lyric-toggle:hover {
+      color: #fff;
+    }
+    .lyric-popup {
+      position: fixed;
+      bottom: -100%;
+      left: 0; right: 0;
+      background-color: rgba(0, 0, 0, 0.9);
+      height: 60vh;
+      transition: bottom 0.3s ease;
+      padding: 1rem;
+      overflow-y: auto;
+      z-index: 20;
+    }
+    .lyric-popup.show { bottom: 0; }
+    .lyric-popup .lyric-back {
+      margin-bottom: 1rem;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .lyric-line {
+      margin: 0.3rem 0;
+      font-size: 1rem;
+      color: #ccc;
+      transition: color 0.3s ease;
+      cursor: pointer;
+    }
+    .lyric-line:hover {
+      color: #fff;
+    }
+    .lyric-line.active {
+      color: #fff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <video autoplay muted loop id="bgVideo" class="bg-video">
+    <source src="doit_bg.mp4" type="video/mp4" />
+  </video>
+  <img src="doit.jpeg" class="bg-blur" id="bgImage" />
+  <div class="container" id="playerContainer">
+    <button class="back-button" onclick="window.location.href='index.html'">&lt;</button>
+    <button class="menu-button" onclick="toggleMenu()">⋮</button>
+    <div class="popup-menu" id="popupMenu">
+      <button onclick="toggleVideo()">Toggle Video</button>
+      <button onclick="adjustVolume(0.1)">Volume +</button>
+      <button onclick="adjustVolume(-0.1)">Volume -</button>
+      <button onclick="shareSong()">Share</button>
+    </div>
+    <img id="albumArt" class="album-art" src="doit.jpeg" alt="cover" />
+    <div class="song-info">
+      <h2 id="title"></h2>
+      <p id="artist"></p>
+    </div>
+    <div class="progress-container">
+      <span id="currentTime">0:00</span>
+      <input type="range" id="seekBar" value="0" min="0" />
+      <span id="duration">0:00</span>
+    </div>
+    <div class="controls">
+      <button id="shuffleBtn" onclick="toggleShuffle()">S</button>
+      <button onclick="prevSong()">⏮</button>
+      <button class="main" onclick="togglePlayPause()" id="playPause">▶</button>
+      <button onclick="nextSong()">⏭</button>
+      <button id="repeatBtn" onclick="toggleRepeat()">R</button>
+    </div>
+    <div class="lyric-toggle" onclick="toggleLyrics()">Show Lyrics</div>
+    <div class="lyric-popup" id="lyricPopup">
+      <button class="lyric-back" onclick="toggleLyrics()">← Back</button>
+      <div id="lyricLines"></div>
+    </div>
+  </div>
+  <audio id="audio"></audio>
+  <script>
+    const audio = document.getElementById("audio");
+    const playPause = document.getElementById("playPause");
+    const title = document.getElementById("title");
+    const artist = document.getElementById("artist");
+    const albumArt = document.getElementById("albumArt");
+    const bgVideo = document.getElementById("bgVideo");
+    const bgImage = document.getElementById("bgImage");
+    const playerContainer = document.getElementById("playerContainer");
+    const seekBar = document.getElementById("seekBar");
+    const currentTime = document.getElementById("currentTime");
+    const duration = document.getElementById("duration");
+    const lyricPopup = document.getElementById("lyricPopup");
+    const lyricLines = document.getElementById("lyricLines");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const repeatBtn = document.getElementById("repeatBtn");
+    const popupMenu = document.getElementById("popupMenu");const songs = [
+  { title: "Unconditionally", artist: "Katy Perry", file: "lagu1.mp3" },
+  { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "lagu2.mp3" },
+  { title: "Yad", artist: "Ariana Grande", file: "lagu3.mp3" },
+  { title: "I'll Do It", artist: "Heidi Montag", file: "lagu4.mp3" },
+  { title: "On The Floor", artist: "JLo ft Pitbull", file: "lagu5.mp3" },
+  { title: "Stereo Love", artist:"unknown", file: "lagu6.mp3"},
+];
+
+let currentIndex = +localStorage.getItem("selectedIndex") || 0;
+let repeatMode = 0;
+let isShuffle = false;
+let showVideo = false;
+let lyrics = [];
+
+function loadSong(index) {
+  const song = songs[index];
+  title.textContent = song.title;
+  artist.textContent = song.artist;
+  audio.src = song.file;
+  albumArt.src = "doit.jpeg";
+  lyrics = getLyrics(song.title);
+  updateLyrics(0);
+}
+
+function togglePlayPause() {
+  if (audio.paused) {
+    audio.play();
+    playPause.textContent = "⏸";
+  } else {
+    audio.pause();
+    playPause.textContent = "▶";
+  }
+}
+
+function nextSong() {
+  currentIndex = (currentIndex + 1) % songs.length;
+  localStorage.setItem("selectedIndex", currentIndex);
+  loadSong(currentIndex);
+  audio.play();
+}
+
+function prevSong() {
+  currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+  localStorage.setItem("selectedIndex", currentIndex);
+  loadSong(currentIndex);
+  audio.play();
+}
+
+function toggleRepeat() {
+  repeatMode = (repeatMode + 1) % 4;
+  repeatBtn.classList.toggle("active", repeatMode !== 0);
+}
+
+function toggleShuffle() {
+  isShuffle = !isShuffle;
+  shuffleBtn.classList.toggle("active", isShuffle);
+}
+
+function toggleMenu() {
+  popupMenu.style.display = popupMenu.style.display === "flex" ? "none" : "flex";
+}
+
+function toggleVideo() {
+  showVideo = !showVideo;
+  bgVideo.classList.toggle("hidden", !showVideo);
+  bgImage.classList.toggle("hidden", showVideo);
+  albumArt.classList.toggle("hidden", showVideo);
+}
+
+function adjustVolume(change) {
+  audio.volume = Math.min(1, Math.max(0, audio.volume + change));
+}
+
+function shareSong() {
+  navigator.share?.({
+    title: title.textContent,
+    text: `Now playing: ${title.textContent} by ${artist.textContent}`,
+    url: location.href
+  });
+}
+
+function formatTime(t) {
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+audio.addEventListener("loadedmetadata", () => {
+  seekBar.max = audio.duration;
+  duration.textContent = formatTime(audio.duration);
+});
+
+audio.addEventListener("timeupdate", () => {
+  seekBar.value = audio.currentTime;
+  currentTime.textContent = formatTime(audio.currentTime);
+  updateLyrics(audio.currentTime);
+});
+
+seekBar.addEventListener("input", () => audio.currentTime = seekBar.value);
+
+function toggleLyrics() {
+  lyricPopup.classList.toggle("show");
+}
+
+function getLyrics(title) {
+  if (title === "Unconditionally") {
+    return [
+      { time: 7.1, text: "Oh no, did I get too close?" },
+      { time: 12, text: "Oh, did I almost see what's really on the inside?" },
+      { time: 22.6, text: "All your insecurities" },
+    ];
+  }
+  if (title === "Rewrite the Stars") {
+  return [
+    { time: 1.5, text: "You know I want you" },
+    { time: 5.5, text: "It's not a secret I try to hide" },
+    { time: 9, text: "You know you want me" },
+    { time: 12.5, text: "So don't keep sayin' our hands are tied" },
+    { time: 16.7, text: "You claim it's not in the cards" },
+    { time: 18.7, text: "And fate is pullin' you miles away and out of a reach from me" },
+    { time: 24.5, text: "But you're hearin' my heart" },
+    { time: 26.5, text: "So who can stop me if I decide that you're my destiny?" },
+    { time: 34, text: "What if we rewrite the stars?" },
+    { time: 38, text: "Say you were made to be mine" },
+    { time: 42, text: "Nothin' could keep us apart" },
+    { time: 45.7, text: "You'll be the one I was meant to find" },
+    { time: 49.7, text: "It's up to you, and it's up to me" },
+    { time: 53.7, text: "No one could say what we get to be" },
+    { time: 57.3, text: "So why don't we rewrite the stars?" },
+    { time: 61, text: "And maybe the world could be ours, tonight" },
+    { time: 67.2, text: "Ah-oh (no, no, no, no)" },
+    { time: 70.5, text: "Ah-oh (mm)" },
+    { time: 73.7, text: "You think it's easy" },
+    { time: 77.7, text: "You think I don't wanna run to you, yeah" },
+    { time: 81.7, text: "But there are mountains (but there are mountains)" },
+    { time: 85.7, text: "And there are doors that we can't walk through" },
+    { time: 89.7, text: "I know you're wondering why" },
+    { time: 93.7, text: "Because we're able to be just you and me within these walls" },
+    { time: 97.7, text: "But when we go outside" },
+    { time: 101.7, text: "You're gonna wake up and see that it was hopeless after all" },
+    { time: 105.7, text: "No one can rewrite the stars" },
+    { time: 109.7, text: "How can you say you'll be mine?" },
+    { time: 113.7, text: "Everythin' keeps us apart" },
+    { time: 117.7, text: "And I'm not the one you were meant to find (the one you were meant to find)" },
+    { time: 121.7, text: "It's not up to you, it's not up to me (yeah)" },
+    { time: 125.7, text: "When everyone tells us what we can be" },
+    { time: 129.7, text: "And how can we rewrite the stars?" },
+    { time: 133.7, text: "Say that the world can be ours, tonight" },
+    { time: 137.7, text: "All I want is to fly with you" },
+    { time: 141.7, text: "All I want is to fall with you" },
+    { time: 145.7, text: "So just give me all of you" },
+    { time: 149.7, text: "It feels impossible (it's not impossible)" },
+    { time: 153.7, text: "Is it impossible?" },
+    { time: 157.7, text: "Say that it's possible" },
+    { time: 161.7, text: "And how do we rewrite the stars?" },
+    { time: 165.7, text: "Say you were made to be mine" },
+    { time: 169.7, text: "And nothin' could keep us apart" },
+    { time: 173.7, text: "'Cause you are the one I was meant to find" },
+    { time: 177.7, text: "It's up to you, and it's up to me" },
+    { time: 181.7, text: "No one could say what we get to be" },
+    { time: 185.7, text: "And why don't we rewrite the stars?" },
+    { time: 189.7, text: "Changin' the world to be ours" },
+    { time: 193.7, text: "Ay, ah-oh (no, no, no, no)" },
+    { time: 197.7, text: "Ah-oh (mm)" },
+    { time: 201.7, text: "You know I want you" },
+    { time: 205.7, text: "It's not a secret I try to hide" },
+    { time: 209.7, text: "But I can't have you" },
+    { time: 213.7, text: "We're bound to break and my hands are tied" }
+  ];
+}
+  return [];
+}
+
+function updateLyrics(current) {
+  lyricLines.innerHTML = lyrics.map((line, i) => {
+    const next = lyrics[i + 1]?.time || Infinity;
+    const active = current >= line.time && current < next;
+    return `<div class="lyric-line${active ? ' active' : ''}" onclick="audio.currentTime=${line.time}">${line.text}</div>`;
+  }).join("");
+}
+
+loadSong(currentIndex);
+
+  </script>
+</body>
+</html>
