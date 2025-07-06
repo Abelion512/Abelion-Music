@@ -1,9 +1,11 @@
-<!-- index.html --><!DOCTYPE html><html lang="en">
+<!-- index.html -->
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Abelion Music Player</title>
   <link rel="icon" href="Icon.jpg" type="image/jpg">
+  <link rel="manifest" href="/manifest.json" />
   <style>
     body {
       margin: 0;
@@ -78,15 +80,15 @@
   </nav>
   <script>
     const songs = [
-      { title: "Unconditionally", artist: "Katy Perry", file: "lagu1.mp3" },
-      { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "lagu2.mp3" },
-      { title: "Yad", artist: "Ariana Grande", file: "lagu3.mp3" },
-      { title: "I'll Do It", artist: "Heidi Montag", file: "lagu4.mp3" },
-      { title: "On The Floor", artist: "JLo ft Pitbull", file: "lagu5.mp3" },
+      { title: "Unconditionally", artist: "Katy Perry", file: "music/lagu1.mp3" },
+      { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "music/lagu2.mp3" },
+      { title: "Yad", artist: "Ariana Grande", file: "music/lagu3.mp3" },
+      { title: "I'll Do It", artist: "Heidi Montag", file: "music/lagu4.mp3" },
+      { title: "On The Floor", artist: "JLo ft Pitbull", file: "music/lagu5.mp3" },
       {
         title: "Stereo Love",
         artist: "unknown",
-        file: "lagu6.mp3",
+        file: "music/lagu6.mp3",
       }
     ];
     const songList = document.getElementById("songList");
@@ -98,7 +100,7 @@ function renderSongs(filter = "") {
     const card = document.createElement("div");
     card.className = "song-card";
     card.innerHTML = `
-      <img src="doit.jpeg" alt="cover" />
+      <img src="image/doit.jpeg" alt="cover" />
       <p>${song.title}</p>
       <small>${song.artist}</small>
     `;
@@ -113,6 +115,11 @@ function renderSongs(filter = "") {
 searchInput.addEventListener("input", () => renderSongs(searchInput.value));
 renderSongs();
 
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('✅ Service Worker registered'))
+      .catch(err => console.error('❌ SW failed', err));
+  }
   </script>
 </body>
 </html>
