@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Detail Lagu - Abelion Music Player</title>
@@ -179,9 +181,9 @@
 </head>
 <body>
   <video autoplay muted loop id="bgVideo" class="bg-video">
-    <source src="doit_bg.mp4" type="video/mp4" />
+    <source src="video/doit_bg.mp4" type="video/mp4" />
   </video>
-  <img src="doit.jpeg" class="bg-blur" id="bgImage" />
+  <img src="image/doit.jpeg" class="bg-blur" id="bgImage" />
   <div class="container" id="playerContainer">
     <button class="back-button" onclick="window.location.href='index.html'">&lt;</button>
     <button class="menu-button" onclick="toggleMenu()">⋮</button>
@@ -232,12 +234,12 @@
     const shuffleBtn = document.getElementById("shuffleBtn");
     const repeatBtn = document.getElementById("repeatBtn");
     const popupMenu = document.getElementById("popupMenu");const songs = [
-  { title: "Unconditionally", artist: "Katy Perry", file: "lagu1.mp3" },
-  { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "lagu2.mp3" },
-  { title: "Yad", artist: "Ariana Grande", file: "lagu3.mp3" },
-  { title: "I'll Do It", artist: "Heidi Montag", file: "lagu4.mp3" },
-  { title: "On The Floor", artist: "JLo ft Pitbull", file: "lagu5.mp3" },
-  { title: "Stereo Love", artist:"unknown", file: "lagu6.mp3"},
+  { title: "Unconditionally", artist: "Katy Perry", file: "music/lagu1.mp3" },
+  { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "music/lagu2.mp3" },
+  { title: "Yad", artist: "Ariana Grande", file: "music/lagu3.mp3" },
+  { title: "I'll Do It", artist: "Heidi Montag", file: "music/lagu4.mp3" },
+  { title: "On The Floor", artist: "JLo ft Pitbull", file: "music/lagu5.mp3" },
+  { title: "Stereo Love", artist:"unknown", file: "music/lagu6.mp3"},
 ];
 
 let currentIndex = +localStorage.getItem("selectedIndex") || 0;
@@ -251,7 +253,7 @@ function loadSong(index) {
   title.textContent = song.title;
   artist.textContent = song.artist;
   audio.src = song.file;
-  albumArt.src = "doit.jpeg";
+  albumArt.src = "image/doit.jpeg";
   lyrics = getLyrics(song.title);
   updateLyrics(0);
 }
@@ -308,7 +310,7 @@ function adjustVolume(change) {
 function shareSong() {
   navigator.share?.({
     title: title.textContent,
-    text: `Now playing: ${title.textContent} by ${artist.textContent}`,
+    text: Now playing: ${title.textContent} by ${artist.textContent},
     url: location.href
   });
 }
@@ -316,7 +318,7 @@ function shareSong() {
 function formatTime(t) {
   const m = Math.floor(t / 60);
   const s = Math.floor(t % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
+  return ${m}:${s};
 }
 
 audio.addEventListener("loadedmetadata", () => {
@@ -409,10 +411,16 @@ function updateLyrics(current) {
   lyricLines.innerHTML = lyrics.map((line, i) => {
     const next = lyrics[i + 1]?.time || Infinity;
     const active = current >= line.time && current < next;
-    return `<div class="lyric-line${active ? ' active' : ''}" onclick="audio.currentTime=${line.time}">${line.text}</div>`;
+    return <div class="lyric-line${active ? ' active' : ''}" onclick="audio.currentTime=${line.time}">${line.text}</div>;
   }).join("");
 }
 
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('✅ Service Worker registered'))
+      .catch(err => console.error('❌ SW failed', err));
+  }
+  
 loadSong(currentIndex);
 
   </script>
