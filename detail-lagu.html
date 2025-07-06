@@ -233,195 +233,149 @@
     const lyricLines = document.getElementById("lyricLines");
     const shuffleBtn = document.getElementById("shuffleBtn");
     const repeatBtn = document.getElementById("repeatBtn");
-    const popupMenu = document.getElementById("popupMenu");const songs = [
-  { title: "Unconditionally", artist: "Katy Perry", file: "music/lagu1.mp3" },
-  { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "music/lagu2.mp3" },
-  { title: "Yad", artist: "Ariana Grande", file: "music/lagu3.mp3" },
-  { title: "I'll Do It", artist: "Heidi Montag", file: "music/lagu4.mp3" },
-  { title: "On The Floor", artist: "JLo ft Pitbull", file: "music/lagu5.mp3" },
-  { title: "Stereo Love", artist:"unknown", file: "music/lagu6.mp3"},
-];
+    const popupMenu = document.getElementById("popupMenu");
 
-let currentIndex = +localStorage.getItem("selectedIndex") || 0;
-let repeatMode = 0;
-let isShuffle = false;
-let showVideo = false;
-let lyrics = [];
-
-function loadSong(index) {
-  const song = songs[index];
-  title.textContent = song.title;
-  artist.textContent = song.artist;
-  audio.src = song.file;
-  albumArt.src = "image/doit.jpeg";
-  lyrics = getLyrics(song.title);
-  updateLyrics(0);
-}
-
-function togglePlayPause() {
-  if (audio.paused) {
-    audio.play();
-    playPause.textContent = "⏸";
-  } else {
-    audio.pause();
-    playPause.textContent = "▶";
-  }
-}
-
-function nextSong() {
-  currentIndex = (currentIndex + 1) % songs.length;
-  localStorage.setItem("selectedIndex", currentIndex);
-  loadSong(currentIndex);
-  audio.play();
-}
-
-function prevSong() {
-  currentIndex = (currentIndex - 1 + songs.length) % songs.length;
-  localStorage.setItem("selectedIndex", currentIndex);
-  loadSong(currentIndex);
-  audio.play();
-}
-
-function toggleRepeat() {
-  repeatMode = (repeatMode + 1) % 4;
-  repeatBtn.classList.toggle("active", repeatMode !== 0);
-}
-
-function toggleShuffle() {
-  isShuffle = !isShuffle;
-  shuffleBtn.classList.toggle("active", isShuffle);
-}
-
-function toggleMenu() {
-  popupMenu.style.display = popupMenu.style.display === "flex" ? "none" : "flex";
-}
-
-function toggleVideo() {
-  showVideo = !showVideo;
-  bgVideo.classList.toggle("hidden", !showVideo);
-  bgImage.classList.toggle("hidden", showVideo);
-  albumArt.classList.toggle("hidden", showVideo);
-}
-
-function adjustVolume(change) {
-  audio.volume = Math.min(1, Math.max(0, audio.volume + change));
-}
-
-shareSong() {
-  navigator.share?.({
-    title: title.textContent,
-    text: `Now playing: ${title.textContent} by ${artist.textContent}`,
-    url: location.href
-  });
-}
-
-function formatTime(t) {
-  const m = Math.floor(t / 60);
-  const s = Math.floor(t % 60).toString().padStart(2, '0');
-  return ${m}:${s};
-}
-
-audio.addEventListener("loadedmetadata", () => {
-  seekBar.max = audio.duration;
-  duration.textContent = formatTime(audio.duration);
-});
-
-audio.addEventListener("timeupdate", () => {
-  seekBar.value = audio.currentTime;
-  currentTime.textContent = formatTime(audio.currentTime);
-  updateLyrics(audio.currentTime);
-});
-
-seekBar.addEventListener("input", () => audio.currentTime = seekBar.value);
-
-function toggleLyrics() {
-  lyricPopup.classList.toggle("show");
-}
-
-function getLyrics(title) {
-  if (title === "Unconditionally") {
-    return [
-      { time: 7.1, text: "Oh no, did I get too close?" },
-      { time: 12, text: "Oh, did I almost see what's really on the inside?" },
-      { time: 22.6, text: "All your insecurities" },
+    const songs = [
+      { title: "Sample Song 1", artist: "Artist One", file: "music/song1.mp3" },
+      { title: "Sample Song 2", artist: "Artist Two", file: "music/song2.mp3" },
+      { title: "Sample Song 3", artist: "Artist Three", file: "music/song3.mp3" },
+      { title: "Sample Song 4", artist: "Artist Four", file: "music/song4.mp3" },
+      { title: "Sample Song 5", artist: "Artist Five", file: "music/song5.mp3" },
+      { title: "Sample Song 6", artist: "Artist Six", file: "music/song6.mp3"},
     ];
-  }
-  if (title === "Rewrite the Stars") {
-  return [
-    { time: 1.5, text: "You know I want you" },
-    { time: 5.5, text: "It's not a secret I try to hide" },
-    { time: 9, text: "You know you want me" },
-    { time: 12.5, text: "So don't keep sayin' our hands are tied" },
-    { time: 16.7, text: "You claim it's not in the cards" },
-    { time: 18.7, text: "And fate is pullin' you miles away and out of a reach from me" },
-    { time: 24.5, text: "But you're hearin' my heart" },
-    { time: 26.5, text: "So who can stop me if I decide that you're my destiny?" },
-    { time: 34, text: "What if we rewrite the stars?" },
-    { time: 38, text: "Say you were made to be mine" },
-    { time: 42, text: "Nothin' could keep us apart" },
-    { time: 45.7, text: "You'll be the one I was meant to find" },
-    { time: 49.7, text: "It's up to you, and it's up to me" },
-    { time: 53.7, text: "No one could say what we get to be" },
-    { time: 57.3, text: "So why don't we rewrite the stars?" },
-    { time: 61, text: "And maybe the world could be ours, tonight" },
-    { time: 67.2, text: "Ah-oh (no, no, no, no)" },
-    { time: 70.5, text: "Ah-oh (mm)" },
-    { time: 73.7, text: "You think it's easy" },
-    { time: 77.7, text: "You think I don't wanna run to you, yeah" },
-    { time: 81.7, text: "But there are mountains (but there are mountains)" },
-    { time: 85.7, text: "And there are doors that we can't walk through" },
-    { time: 89.7, text: "I know you're wondering why" },
-    { time: 93.7, text: "Because we're able to be just you and me within these walls" },
-    { time: 97.7, text: "But when we go outside" },
-    { time: 101.7, text: "You're gonna wake up and see that it was hopeless after all" },
-    { time: 105.7, text: "No one can rewrite the stars" },
-    { time: 109.7, text: "How can you say you'll be mine?" },
-    { time: 113.7, text: "Everythin' keeps us apart" },
-    { time: 117.7, text: "And I'm not the one you were meant to find (the one you were meant to find)" },
-    { time: 121.7, text: "It's not up to you, it's not up to me (yeah)" },
-    { time: 125.7, text: "When everyone tells us what we can be" },
-    { time: 129.7, text: "And how can we rewrite the stars?" },
-    { time: 133.7, text: "Say that the world can be ours, tonight" },
-    { time: 137.7, text: "All I want is to fly with you" },
-    { time: 141.7, text: "All I want is to fall with you" },
-    { time: 145.7, text: "So just give me all of you" },
-    { time: 149.7, text: "It feels impossible (it's not impossible)" },
-    { time: 153.7, text: "Is it impossible?" },
-    { time: 157.7, text: "Say that it's possible" },
-    { time: 161.7, text: "And how do we rewrite the stars?" },
-    { time: 165.7, text: "Say you were made to be mine" },
-    { time: 169.7, text: "And nothin' could keep us apart" },
-    { time: 173.7, text: "'Cause you are the one I was meant to find" },
-    { time: 177.7, text: "It's up to you, and it's up to me" },
-    { time: 181.7, text: "No one could say what we get to be" },
-    { time: 185.7, text: "And why don't we rewrite the stars?" },
-    { time: 189.7, text: "Changin' the world to be ours" },
-    { time: 193.7, text: "Ay, ah-oh (no, no, no, no)" },
-    { time: 197.7, text: "Ah-oh (mm)" },
-    { time: 201.7, text: "You know I want you" },
-    { time: 205.7, text: "It's not a secret I try to hide" },
-    { time: 209.7, text: "But I can't have you" },
-    { time: 213.7, text: "We're bound to break and my hands are tied" }
-  ];
-}
-  return [];
-}
 
-function updateLyrics(current) {
-  lyricLines.innerHTML = lyrics.map((line, i) => {
-    const next = lyrics[i + 1]?.time || Infinity;
-    const active = current >= line.time && current < next;
-    return `<div class="lyric-line${active ? ' active' : ''}" onclick="audio.currentTime=${line.time}">${line.text}</div>`;
-  }).join("");
-}
+    let currentIndex = parseInt(localStorage.getItem("selectedIndex")) || 0;
+    let repeatMode = 0;
+    let isShuffle = false;
+    let showVideo = false;
+    let lyrics = [];
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('✅ Service Worker registered'))
-      .catch(err => console.error('❌ SW failed', err));
-  }
-  
-loadSong(currentIndex);
+    function loadSong(index) {
+      const song = songs[index];
+      title.textContent = song.title;
+      artist.textContent = song.artist;
+      audio.src = song.file;
+      albumArt.src = "image/doit.jpeg";
+      lyrics = getLyrics(song.title);
+      updateLyrics(0);
+    }
+
+    function togglePlayPause() {
+      if (audio.paused) {
+        audio.play();
+        playPause.textContent = "⏸";
+      } else {
+        audio.pause();
+        playPause.textContent = "▶";
+      }
+    }
+
+    function nextSong() {
+      currentIndex = (currentIndex + 1) % songs.length;
+      localStorage.setItem("selectedIndex", currentIndex);
+      loadSong(currentIndex);
+      audio.play();
+    }
+
+    function prevSong() {
+      currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+      localStorage.setItem("selectedIndex", currentIndex);
+      loadSong(currentIndex);
+      audio.play();
+    }
+
+    function toggleRepeat() {
+      repeatMode = (repeatMode + 1) % 4;
+      repeatBtn.classList.toggle("active", repeatMode !== 0);
+    }
+
+    function toggleShuffle() {
+      isShuffle = !isShuffle;
+      shuffleBtn.classList.toggle("active", isShuffle);
+    }
+
+    function toggleMenu() {
+      popupMenu.style.display = popupMenu.style.display === "flex" ? "none" : "flex";
+    }
+
+    function toggleVideo() {
+      showVideo = !showVideo;
+      bgVideo.classList.toggle("hidden", !showVideo);
+      bgImage.classList.toggle("hidden", showVideo);
+      albumArt.classList.toggle("hidden", showVideo);
+    }
+
+    function adjustVolume(change) {
+      audio.volume = Math.min(1, Math.max(0, audio.volume + change));
+    }
+
+    function shareSong() {
+      if (navigator.share) {
+        navigator.share({
+          title: title.textContent,
+          text: `Now playing: ${title.textContent} by ${artist.textContent}`,
+          url: location.href
+        });
+      }
+    }
+
+    function formatTime(t) {
+      const m = Math.floor(t / 60);
+      const s = Math.floor(t % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    audio.addEventListener("loadedmetadata", () => {
+      seekBar.max = audio.duration;
+      duration.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      seekBar.value = audio.currentTime;
+      currentTime.textContent = formatTime(audio.currentTime);
+      updateLyrics(audio.currentTime);
+    });
+
+    seekBar.addEventListener("input", () => audio.currentTime = seekBar.value);
+
+    function toggleLyrics() {
+      lyricPopup.classList.toggle("show");
+    }
+
+    function getLyrics(title) {
+      // Sample lyrics structure - replace with your own original content
+      if (title === "Sample Song 1") {
+        return [
+          { time: 7.1, text: "Sample lyric line 1" },
+          { time: 12, text: "Sample lyric line 2" },
+          { time: 22.6, text: "Sample lyric line 3" },
+        ];
+      }
+      if (title === "Sample Song 2") {
+        return [
+          { time: 1.5, text: "Another sample lyric" },
+          { time: 5.5, text: "Second line of sample" },
+          { time: 9, text: "Third sample line" },
+        ];
+      }
+      return [];
+    }
+
+    function updateLyrics(current) {
+      lyricLines.innerHTML = lyrics.map((line, i) => {
+        const next = lyrics[i + 1]?.time || Infinity;
+        const active = current >= line.time && current < next;
+        return `<div class="lyric-line${active ? ' active' : ''}" onclick="audio.currentTime=${line.time}">${line.text}</div>`;
+      }).join("");
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('✅ Service Worker registered'))
+        .catch(err => console.error('❌ SW failed', err));
+    }
+    
+    loadSong(currentIndex);
 
   </script>
 </body>
