@@ -5,135 +5,124 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Abelion Music Player</title>
   <link rel="icon" href="Icon.jpg" type="image/jpg">
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Abelion Music Player">
-  <link rel="apple-touch-icon" href="Icon.jpg">
+  <link rel="manifest" href="/manifest.json" />
   <style>
+    :root {
+      --bg: #000;
+      --card: #121212;
+      --primary: #1db954;
+      --text: #fff;
+      --subtext: #aaa;
+    }
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #000;
-      color: white;
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
-    header, footer {
+    header {
       padding: 1rem;
+      font-size: 1.4rem;
       text-align: center;
+      font-weight: bold;
+      background: #111;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .search-box {
-      padding: 0.7rem 1rem;
-      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      position: sticky;
+      top: 3.2rem;
+      background: #111;
+      z-index: 9;
     }
     .search-box input {
-      width: 83vw;
-      padding: 0.7rem;
-      border-radius: 20px;
-      border: 1px solid #333;
-      background: #111;
-      color: white;
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      border: none;
+      background: #222;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    .section-title {
+      padding: 0.7rem 1rem;
+      font-size: 0.9rem;
+      color: var(--subtext);
     }
     .song-list {
-      flex: 1;
-      overflow-y: auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 1rem;
-      padding: 1rem;
+      padding: 0 1rem 6rem;
     }
     .song-card {
-      background: #111;
-      padding: 0.5rem;
-      border-radius: 15px;
+      background: var(--card);
+      padding: 0.7rem;
+      border-radius: 0.75rem;
       text-align: center;
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: all 0.3s ease;
     }
     .song-card:hover {
-      transform: scale(1.05);
+      background: #1a1a1a;
     }
     .song-card img {
       width: 100%;
-      border-radius: 10px;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .song-card p {
+      margin: 0;
+      font-weight: 500;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .song-card small {
+      font-size: 0.75rem;
+      color: var(--subtext);
     }
     nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #111;
       display: flex;
       justify-content: space-around;
-      background: #111;
-      padding: 0.5rem;
+      padding: 0.8rem 0;
+      border-top: 1px solid #222;
     }
     nav button {
       background: none;
       border: none;
-      color: white;
-      font-size: 1.2rem;
+      color: var(--text);
+      font-size: 1.3rem;
       cursor: pointer;
-    }
-    .offline-indicator {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #ff4444;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      display: none;
-      z-index: 1000;
-    }
-    .offline-indicator.show {
-      display: block;
-    }
-    .install-prompt {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1db954;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 25px;
-      cursor: pointer;
-      display: none;
-      z-index: 1000;
-      animation: slideUp 0.3s ease;
-    }
-    .install-prompt.show {
-      display: block;
-    }
-    @keyframes slideUp {
-      from { transform: translateX(-50%) translateY(100px); opacity: 0; }
-      to { transform: translateX(-50%) translateY(0); opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <div class="offline-indicator" id="offlineIndicator">
-    📱 Offline Mode
-  </div>
-  
-  <div class="install-prompt" id="installPrompt">
-    📱 Install App for Better Experience
-  </div>
-  
-  <header>
-    <h2>Abelion Music Player</h2>
-  </header>
+  <header>Abelion Music Player</header>
   <div class="search-box">
-    <input type="text" placeholder="Search..." id="searchInput" />
+    <input type="text" placeholder="Search music..." id="searchInput" />
   </div>
-  <div class="song-list" id="songList"></div>
-  <nav>
-    <button>🏠</button>
-    <button>➕</button>
-    <button>👤</button>
-  </nav>
-  
-  <script>
+  <div class="section-title">🎧 Lagu Tersedia</div>
+  <div class="song-list" id="songList"></div>  <div class="section-title">🕘 Terakhir Diputar</div>
+  <div class="song-list" id="recentPlayed"></div>  <div class="section-title">❤️ Favorit Kamu</div>
+  <div class="song-list" id="favoriteList"></div>  <nav>
+    <button title="Home">🏠</button>
+    <button title="Add" onclick="showAddMenu()">➕</button>
+    <button title="Profile">👤</button>
+  </nav>  <script>
     const songs = [
       { title: "Unconditionally", artist: "Katy Perry", file: "music/lagu1.mp3" },
       { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "music/lagu2.mp3" },
@@ -142,113 +131,79 @@
       { title: "On The Floor", artist: "JLo ft Pitbull", file: "music/lagu5.mp3" },
       { title: "Stereo Love", artist: "unknown", file: "music/lagu6.mp3" }
     ];
-    
+
     const songList = document.getElementById("songList");
     const searchInput = document.getElementById("searchInput");
-    const offlineIndicator = document.getElementById("offlineIndicator");
-    const installPrompt = document.getElementById("installPrompt");
-    
-    let deferredPrompt;
-    
+    const recentPlayed = document.getElementById("recentPlayed");
+    const favoriteList = document.getElementById("favoriteList");
+    let favorites = JSON.parse(localStorage.getItem("favorites") || "{}");
+
+    function createCard(song, i) {
+      const div = document.createElement("div");
+      div.className = "song-card";
+      div.innerHTML = `
+        <img src="image/doit.jpeg" alt="cover" />
+        <p>${song.title}</p>
+        <small>${song.artist}</small>
+      `;
+      div.onclick = () => {
+        localStorage.setItem("selectedIndex", i);
+        location.href = "detail-lagu.html";
+      };
+      return div;
+    }
+
     function renderSongs(filter = "") {
       songList.innerHTML = "";
-      songs.filter(s => s.title.toLowerCase().includes(filter.toLowerCase())).forEach((song, i) => {
-        const card = document.createElement("div");
-        card.className = "song-card";
-        card.innerHTML = `
-          <img src="image/doit.jpeg" alt="cover" />
-          <p>${song.title}</p>
-          <small>${song.artist}</small>
-        `;
-        card.onclick = () => {
-          localStorage.setItem("selectedIndex", i);
-          location.href = "detail-lagu.html";
-        };
-        songList.appendChild(card);
+      songs.filter(s => s.title.toLowerCase().includes(filter.toLowerCase())).forEach((s, i) => {
+        songList.appendChild(createCard(s, i));
       });
     }
-    
+
+    function renderRecent() {
+      const i = parseInt(localStorage.getItem("selectedIndex"));
+      if (!isNaN(i) && songs[i]) {
+        recentPlayed.innerHTML = "";
+        recentPlayed.appendChild(createCard(songs[i], i));
+      }
+    }
+
+    function renderFavorites() {
+      favoriteList.innerHTML = "";
+      songs.forEach((s, i) => {
+        const key = `${s.title} - ${s.artist}`;
+        if (favorites[key]) {
+          favoriteList.appendChild(createCard(s, i));
+        }
+      });
+    }
+
+    function showAddMenu() {
+      const opt = prompt("Add Song or Request? (add/request)");
+      if (opt === "add") {
+        const title = prompt("Judul lagu?");
+        const artist = prompt("Artis?");
+        const file = prompt("Path file lagu?");
+        if (title && artist && file) {
+          songs.push({ title, artist, file });
+          renderSongs();
+          alert("🎵 Lagu berhasil ditambahkan!");
+        }
+      } else if (opt === "request") {
+        alert("📩 Fitur request lagu belum tersedia offline.");
+      }
+    }
+
     searchInput.addEventListener("input", () => renderSongs(searchInput.value));
     renderSongs();
-    
-    // Service Worker Registration
+    renderRecent();
+    renderFavorites();
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
-        .then(registration => {
-          console.log('✅ Service Worker registered successfully:', registration);
-          
-          // Check for updates
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('🔄 New content available, please refresh');
-                // You can show a notification here
-              }
-            });
-          });
-        })
-        .catch(error => {
-          console.error('❌ Service Worker registration failed:', error);
-        });
+        .then(() => console.log('✅ SW registered'))
+        .catch(err => console.error('❌ SW failed', err));
     }
-    
-    // Network status detection
-    function updateOnlineStatus() {
-      if (navigator.onLine) {
-        offlineIndicator.classList.remove('show');
-        console.log('🌐 Back online');
-      } else {
-        offlineIndicator.classList.add('show');
-        console.log('📱 Offline mode');
-      }
-    }
-    
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    updateOnlineStatus();
-    
-    // PWA Install Prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installPrompt.classList.add('show');
-    });
-    
-    installPrompt.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to install prompt: ${outcome}`);
-        deferredPrompt = null;
-        installPrompt.classList.remove('show');
-      }
-    });
-    
-    // Hide install prompt after app is installed
-    window.addEventListener('appinstalled', () => {
-      console.log('🎉 PWA was installed');
-      installPrompt.classList.remove('show');
-    });
-    
-    // Preload critical resources
-    function preloadResources() {
-      const criticalResources = [
-        'image/doit.jpeg',
-        'music/lagu1.mp3',
-        'music/lagu2.mp3'
-      ];
-      
-      criticalResources.forEach(resource => {
-        const link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.href = resource;
-        document.head.appendChild(link);
-      });
-    }
-    
-    // Preload resources after page load
-    window.addEventListener('load', preloadResources);
   </script>
 </body>
 </html>
