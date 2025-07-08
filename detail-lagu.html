@@ -602,5 +602,37 @@ const songs = [
     window.onload = () => {
       loadSong(currentIndex);
     };
+   let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const installBtn = document.createElement('div');
+  installBtn.textContent = '📲 Install App';
+  installBtn.style.cssText = `
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#1db954;
+    color:white;
+    padding:0.7rem 2rem;
+    border-radius:30px;
+    z-index:9999;
+    font-weight:bold;
+    box-shadow:0 0 10px rgba(0,0,0,0.4);
+    cursor:pointer;
+  `;
+  document.body.appendChild(installBtn);
+
+  installBtn.addEventListener('click', async () => {
+    installBtn.remove();
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('User chose:', outcome);
+    deferredPrompt = null;
+  });
+});
+
   </script></body>
   </html>
