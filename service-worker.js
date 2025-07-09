@@ -4,7 +4,6 @@ const urlsToCache = [
   '/index.html',
   '/detail-lagu.html',
   '/manifest.json',
-  '/Icon.jpg',
   '/image/doit.jpeg',
   '/video/doit_bg.mp4',
   '/music/lagu1.mp3',
@@ -12,7 +11,13 @@ const urlsToCache = [
   '/music/lagu3.mp3',
   '/music/lagu4.mp3',
   '/music/lagu5.mp3',
-  '/music/lagu6.mp3'
+  '/music/lagu6.mp3',
+  '/lyrics/Unconditionally.lrc',
+  '/lyrics/Rewrite the Stars.lrc',
+  '/lyrics/I\'ll Do It.lrc',
+  '/lyrics/Yad.lrc',
+  '/lyrics/On The Floor.lrc',
+  '/lyrics/Stereo Love.lrc'
 ];
 
 // Install event - cache all necessary files
