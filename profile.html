@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - Abelion Music Player</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="image/icon-192.png" type="image/png">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 2rem;
+    }
+    .install-prompt {
+      display: none;
+      background: #1db954;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 12px rgba(0,0,0,0.4);
+    }
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #111;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.8rem 0;
+      border-top: 1px solid #222;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Your Profile</h1>
+  <p>manage account, install app, and more settings</p> 
+  <div class="install-prompt" id="installPrompt">📲 Install Abelion Music</div>  
+    <nav>
+    <button title="Home" onclick="location.href='index.html'">🏠</button>
+  <script>
+    let deferredPrompt;
+    const installPrompt = document.getElementById("installPrompt");
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installPrompt.style.display = 'inline-block';
+    });
+
+    installPrompt.addEventListener('click', async () => {
+      installPrompt.style.display = 'none';
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('User install outcome:', outcome);
+      deferredPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('🎉 PWA installed');
+      installPrompt.remove();
+    });
+  </script>
+  </body>
+  </html>
