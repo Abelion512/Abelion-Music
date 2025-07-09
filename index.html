@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Abelion Music Player</title>
@@ -108,21 +107,62 @@
       font-size: 1.3rem;
       cursor: pointer;
     }
+    .offline-indicator {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #ff4444;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      display: none;
+      z-index: 1000;
+    }
+    .offline-indicator.show {
+      display: block;
+    }
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1db954;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 25px;
+      cursor: pointer;
+      display: none;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+    }
+    .install-prompt.show {
+      display: block;
+    }
+    @keyframes slideUp {
+      from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
+  <div class="offline-indicator" id="offlineIndicator">📱 Offline Mode</div>
   <header>Abelion Music Player</header>
   <div class="search-box">
     <input type="text" placeholder="Search music..." id="searchInput" />
   </div>
   <div class="section-title">🎧 Lagu Tersedia</div>
-  <div class="song-list" id="songList"></div>  <div class="section-title">🕘 Terakhir Diputar</div>
-  <div class="song-list" id="recentPlayed"></div>  <div class="section-title">❤️ Favorit Kamu</div>
-  <div class="song-list" id="favoriteList"></div>  <nav>
-    <button title="Home">🏠</button>
+  <div class="song-list" id="songList"></div>
+  <div class="section-title">🕘 Terakhir Diputar</div>
+  <div class="song-list" id="recentPlayed"></div>
+  <div class="section-title">❤️ Favorit Kamu</div>
+  <div class="song-list" id="favoriteList"></div>
+  <nav>
+    <button title="Home" onclick="location.href='index.html'">🏠</button>
     <button title="Add" onclick="showAddMenu()">➕</button>
-    <button title="Profile">👤</button>
-  </nav>  <script>
+    <button title="Profile" onclick="location.href='profile.html'">👤</button>
+  </nav>
+  <script>
     const songs = [
       { title: "Unconditionally", artist: "Katy Perry", file: "music/lagu1.mp3" },
       { title: "Rewrite the Stars", artist: "James Arthur & Anne-Marie", file: "music/lagu2.mp3" },
@@ -130,113 +170,94 @@
       { title: "I'll Do It", artist: "Heidi Montag", file: "music/lagu4.mp3" },
       { title: "On The Floor", artist: "JLo ft Pitbull", file: "music/lagu5.mp3" },
       { title: "Stereo Love", artist: "unknown", file: "music/lagu6.mp3" }
-    ];
+    ];const songList = document.getElementById("songList");
+const searchInput = document.getElementById("searchInput");
+const recentPlayed = document.getElementById("recentPlayed");
+const favoriteList = document.getElementById("favoriteList");
+const offlineIndicator = document.getElementById("offlineIndicator");
+const installPrompt = document.getElementById("installPrompt");
+let favorites = JSON.parse(localStorage.getItem("favorites") || "{}");
 
-    const songList = document.getElementById("songList");
-    const searchInput = document.getElementById("searchInput");
-    const recentPlayed = document.getElementById("recentPlayed");
-    const favoriteList = document.getElementById("favoriteList");
-    let favorites = JSON.parse(localStorage.getItem("favorites") || "{}");
-
-    function createCard(song, i) {
-      const div = document.createElement("div");
-      div.className = "song-card";
-      div.innerHTML = `
-        <img src="image/doit.jpeg" alt="cover" />
-        <p>${song.title}</p>
-        <small>${song.artist}</small>
-      `;
-      div.onclick = () => {
-        localStorage.setItem("selectedIndex", i);
-        location.href = "detail-lagu.html";
-      };
-      return div;
-    }
-
-    function renderSongs(filter = "") {
-      songList.innerHTML = "";
-      songs.filter(s => s.title.toLowerCase().includes(filter.toLowerCase())).forEach((s, i) => {
-        songList.appendChild(createCard(s, i));
-      });
-    }
-
-    function renderRecent() {
-      const i = parseInt(localStorage.getItem("selectedIndex"));
-      if (!isNaN(i) && songs[i]) {
-        recentPlayed.innerHTML = "";
-        recentPlayed.appendChild(createCard(songs[i], i));
-      }
-    }
-
-    function renderFavorites() {
-      favoriteList.innerHTML = "";
-      songs.forEach((s, i) => {
-        const key = `${s.title} - ${s.artist}`;
-        if (favorites[key]) {
-          favoriteList.appendChild(createCard(s, i));
-        }
-      });
-    }
-
-    function showAddMenu() {
-      const opt = prompt("Add Song or Request? (add/request)");
-      if (opt === "add") {
-        const title = prompt("Judul lagu?");
-        const artist = prompt("Artis?");
-        const file = prompt("Path file lagu?");
-        if (title && artist && file) {
-          songs.push({ title, artist, file });
-          renderSongs();
-          alert("🎵 Lagu berhasil ditambahkan!");
-        }
-      } else if (opt === "request") {
-        alert("📩 Fitur request lagu belum tersedia offline.");
-      }
-    }
-
-    searchInput.addEventListener("input", () => renderSongs(searchInput.value));
-    renderSongs();
-    renderRecent();
-    renderFavorites();
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('✅ SW registered'))
-        .catch(err => console.error('❌ SW failed', err));
-    }
-    
-    let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  const installBtn = document.createElement('div');
-  installBtn.textContent = '📲 Install App';
-  installBtn.style.cssText = `
-    position:fixed;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    background:#1db954;
-    color:white;
-    padding:0.7rem 2rem;
-    border-radius:30px;
-    z-index:9999;
-    font-weight:bold;
-    box-shadow:0 0 10px rgba(0,0,0,0.4);
-    cursor:pointer;
+function createCard(song, i) {
+  const div = document.createElement("div");
+  div.className = "song-card";
+  div.innerHTML = `
+    <img src="image/doit.jpeg" alt="cover" />
+    <p>${song.title}</p>
+    <small>${song.artist}</small>
   `;
-  document.body.appendChild(installBtn);
+  div.onclick = () => {
+    localStorage.setItem("selectedIndex", i);
+    location.href = "detail-lagu.html";
+  };
+  return div;
+}
 
-  installBtn.addEventListener('click', async () => {
-    installBtn.remove();
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('User chose:', outcome);
-    deferredPrompt = null;
+function renderSongs(filter = "") {
+  songList.innerHTML = "";
+  songs.filter(s => s.title.toLowerCase().includes(filter.toLowerCase())).forEach((s, i) => {
+    songList.appendChild(createCard(s, i));
   });
-});
+}
 
+function renderRecent() {
+  const i = parseInt(localStorage.getItem("selectedIndex"));
+  if (!isNaN(i) && songs[i]) {
+    recentPlayed.innerHTML = "";
+    recentPlayed.appendChild(createCard(songs[i], i));
+  }
+}
+
+function renderFavorites() {
+  favoriteList.innerHTML = "";
+  songs.forEach((s, i) => {
+    const key = `${s.title} - ${s.artist}`;
+    if (favorites[key]) {
+      favoriteList.appendChild(createCard(s, i));
+    }
+  });
+}
+
+function showAddMenu() {
+  const opt = prompt("Add Song or Request? (add/request)");
+  if (opt === "add") {
+    const title = prompt("Judul lagu?");
+    const artist = prompt("Artis?");
+    const file = prompt("Path file lagu?");
+    if (title && artist && file) {
+      songs.push({ title, artist, file });
+      renderSongs();
+      alert("🎵 Lagu berhasil ditambahkan!");
+    }
+  } else if (opt === "request") {
+    alert("📩 Fitur request lagu belum tersedia offline.");
+  }
+}
+
+searchInput.addEventListener("input", () => renderSongs(searchInput.value));
+renderSongs();
+renderRecent();
+renderFavorites();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('✅ SW registered'))
+    .catch(err => console.error('❌ SW failed', err));
+}
+
+// Online/Offline Indicator
+function updateOnlineStatus() {
+  if (navigator.onLine) {
+    offlineIndicator.classList.remove('show');
+    console.log('🌐 Online');
+  } else {
+    offlineIndicator.classList.add('show');
+    console.log('📴 Offline');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();  
   </script>
 </body>
 </html>
